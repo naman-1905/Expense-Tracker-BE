@@ -1,7 +1,6 @@
 from fastapi import FastAPI
-from routers import income, expense
+from routers import transaction
 
-app = FastAPI(title="Expense Tracker CRUD")
+app = FastAPI(title="Transaction CRUD API")
 
-app.include_router(income.router, prefix="/income", tags=["Income"])
-app.include_router(expense.router, prefix="/expense", tags=["Expense"])
+app.include_router(transaction.router, prefix="/transactions", tags=["Transactions"])
