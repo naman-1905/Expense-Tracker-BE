@@ -14,7 +14,7 @@ from app.utils import validate_transaction_type
 
 router = APIRouter()
 
-@router.post("/", response_model=TransactionResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/create", response_model=TransactionResponse, status_code=status.HTTP_201_CREATED)
 def create_transaction(
     transaction: TransactionCreate,
     current_user: User = Depends(get_current_user),
@@ -43,7 +43,7 @@ def create_transaction(
     
     return db_transaction
 
-@router.get("/", response_model=List[TransactionResponse])
+@router.get("/list", response_model=List[TransactionResponse])
 def get_user_transactions(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -68,7 +68,7 @@ def get_user_transactions(
     
     return transactions
 
-@router.get("/{transaction_id}", response_model=TransactionResponse)
+@router.get("/get/{transaction_id}", response_model=TransactionResponse)
 def get_transaction(
     transaction_id: int,
     current_user: User = Depends(get_current_user),
@@ -88,7 +88,7 @@ def get_transaction(
     
     return transaction
 
-@router.put("/{transaction_id}", response_model=TransactionResponse)
+@router.put("/update/{transaction_id}", response_model=TransactionResponse)
 def update_transaction(
     transaction_id: int,
     transaction_update: TransactionUpdate,
@@ -131,7 +131,7 @@ def update_transaction(
     
     return transaction
 
-@router.delete("/{transaction_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/delete/{transaction_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_transaction(
     transaction_id: int,
     current_user: User = Depends(get_current_user),
