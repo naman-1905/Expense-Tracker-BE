@@ -1,22 +1,13 @@
-from flask import Flask
+from flask import Flask, jsonify, request
 from flask_cors import CORS
-from config import Config
-from routes.history import history_bp
+from database import Config, execute_query
+from datetime import datetime, timedelta
 
 def create_app():
-    """Application factory pattern"""
     app = Flask(__name__)
-    
-    # Load configuration
     config = Config()
-    
-    # Enable CORS for all routes
     CORS(app)
-    
-    # Register blueprints
-    app.register_blueprint(history_bp, url_prefix='/api/history')
-    
-    # Root endpoint
+
     @app.route('/')
     def root():
         return {
@@ -31,7 +22,77 @@ def create_app():
                 'transactions': '/api/history/transactions?user_id={user_id}&start_date={start_date}&end_date={end_date}'
             }
         }
-    
+
+    @app.route('/api/history/health', methods=['GET'])
+    def health_check():
+        return jsonify({
+            "service": "flask-history",
+            "status": "healthy",
+            "timestamp": datetime.now().isoformat()
+        })
+
+    @app.route('/api/history/balance', methods=['GET'])
+    def get_balance():
+        try:
+            user_id = request.args.get('user_id')
+            query = """
+                SELECT COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE -amount END), 0) as balance 
+                FROM transactions 
+                WHERE user_id = %s
+            """
+            result = execute_query(query, (user_id,), fetch=True)
+            return jsonify(result[0] if result else {'balance': 0})
+        except Exception as e:
+            return jsonify({"error": "Internal server error", "message": str(e)}), 500
+
+    @app.route('/api/history/income', methods=['GET'])
+    def get_income():
+        try:
+            user_id = request.args.get('user_id')
+            query = """
+                SELECT COALESCE(SUM(amount), 0) as total_income 
+                FROM transactions 
+                WHERE user_id = %s AND type = 'income'
+            """
+            result = execute_query(query, (user_id,), fetch=True)
+            return jsonify(result[0] if result else {'total_income': 0})
+        except Exception as e:
+            return jsonify({"error": "Internal server error", "message": str(e)}), 500
+
+    @app.route('/api/history/expenses', methods=['GET'])
+    def get_expenses():
+        try:
+            user_id = request.args.get('user_id')
+            query = """
+                SELECT COALESCE(SUM(amount), 0) as total_expenses 
+                FROM transactions 
+                WHERE user_id = %s AND type = 'expense'
+            """
+            result = execute_query(query, (user_id,), fetch=True)
+            return jsonify(result[0] if result else {'total_expenses': 0})
+        except Exception as e:
+            return jsonify({"error": "Internal server error", "message": str(e)}), 500
+
+    @app.route('/api/history/transactions', methods=['GET'])
+    def get_transactions():
+        try:
+            user_id = request.args.get('user_id')
+            days = int(request.args.get('days', 30))
+            limit = int(request.args.get('limit', 10))
+            
+            query = """
+                SELECT * FROM transactions 
+                WHERE user_id = %s 
+                AND created_at >= %s 
+                ORDER BY created_at DESC 
+                LIMIT %s
+            """
+            date_limit = datetime.now() - timedelta(days=days)
+            result = execute_query(query, (user_id, date_limit, limit), fetch=True)
+            return jsonify(result)
+        except Exception as e:
+            return jsonify({"error": "Internal server error", "message": str(e)}), 500
+
     return app
 
 if __name__ == '__main__':
