@@ -34,27 +34,40 @@ class Config:
 # ----------------------------
 
 def get_connection():
-    """Return a new database connection."""
+    """Return a new database connection with schema search path set."""
     config = Config()
-    return psycopg2.connect(**config.DATABASE_CONFIG)
+    conn = psycopg2.connect(**config.DATABASE_CONFIG)
+    
+    # Set the search path to include the expense schema
+    with conn.cursor() as cursor:
+        cursor.execute("SET search_path TO expense, public;")
+    conn.commit()
+    
+    return conn
 
-def execute_query(query, params=None, fetch=False):
+def execute_query(query, params=None, fetch=False, fetch_one=False, fetch_all=False):
     """
     Execute a SQL query.
     
     :param query: SQL query string
     :param params: Tuple of parameters (optional)
-    :param fetch: True to return results, False for insert/update/delete
-    :return: List of dicts if fetch=True, else None
+    :param fetch: Legacy parameter for backward compatibility (use fetch_all instead)
+    :param fetch_one: True to return single result
+    :param fetch_all: True to return all results
+    :return: Single dict, list of dicts, or None
     """
     conn = get_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         cursor.execute(query, params)
-        if fetch:
+        
+        if fetch_one:
+            result = cursor.fetchone()
+        elif fetch_all or fetch:  # fetch for backward compatibility
             result = cursor.fetchall()
         else:
             result = None
+            
         conn.commit()
         return result
     except Exception as e:
