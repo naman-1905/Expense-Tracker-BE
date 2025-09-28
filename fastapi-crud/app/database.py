@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv
-import urllib.parse  # <- import for URL encoding
+import urllib.parse
 
 load_dotenv()
 
@@ -17,14 +17,17 @@ DB_PASSWORD = os.getenv("DB_PASSWORD", "expense_pass")
 # URL-encode password to handle special characters like @, :, /
 DB_PASSWORD_ENCODED = urllib.parse.quote_plus(DB_PASSWORD)
 
-# Construct the database URL
-DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD_ENCODED}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+# Construct the database URL with schema specification
+DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD_ENCODED}@{DB_HOST}:{DB_PORT}/{DB_NAME}?options=-csearch_path%3Dexpense"
 
 # SQLAlchemy engine and session
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+
+# Set the schema for the Base metadata
+Base.metadata.schema = 'expense'
 
 # Dependency to get database session
 def get_db():

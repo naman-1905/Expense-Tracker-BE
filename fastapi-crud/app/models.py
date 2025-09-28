@@ -9,6 +9,7 @@ from datetime import datetime
 # SQLAlchemy Models
 class User(Base):
     __tablename__ = "users"
+    __table_args__ = {'schema': 'expense'}
     
     user_id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False)
@@ -20,6 +21,10 @@ class User(Base):
 
 class Transaction(Base):
     __tablename__ = "transactions"
+    __table_args__ = (
+        CheckConstraint("type IN ('income', 'expense')", name='check_transaction_type'),
+        {'schema': 'expense'}
+    )
     
     transaction_id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), nullable=False)
@@ -27,11 +32,7 @@ class Transaction(Base):
     date = Column(TIMESTAMP, server_default=func.current_timestamp())
     type = Column(String(20), nullable=False)
     emoji = Column(String(10), nullable=True)
-    user_id = Column(Integer, ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False)
-    
-    __table_args__ = (
-        CheckConstraint("type IN ('income', 'expense')", name='check_transaction_type'),
-    )
+    user_id = Column(Integer, ForeignKey("expense.users.user_id", ondelete="CASCADE"), nullable=False)
     
     user = relationship("User", back_populates="transactions")
 

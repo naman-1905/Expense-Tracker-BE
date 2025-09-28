@@ -9,6 +9,11 @@ from app.database import get_db
 from app.models import User, TokenData
 import os
 from dotenv import load_dotenv
+import logging
+
+# Add logging for debugging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -16,6 +21,9 @@ load_dotenv()
 SECRET_KEY = os.getenv("JWT_SECRET")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+# Debug log the secret key
+logger.debug(f"JWT_SECRET loaded: {SECRET_KEY is not None}")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
@@ -59,15 +67,38 @@ async def get_current_user(
     
     try:
         token = credentials.credentials
+        logger.debug(f"Token received: {token[:50]}...")
+        
+        # First try to get unverified claims to see token structure
+        try:
+            unverified = jwt.get_unverified_claims(token)
+            logger.debug(f"Unverified payload: {unverified}")
+        except Exception as e:
+            logger.debug(f"Could not get unverified claims: {e}")
+        
+        # Now decode with verification
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("sub")
+        logger.debug(f"Decoded payload: {payload}")
+        
+        # Handle both FastAPI format (sub: email) and Express format (email field)
+        email: str = payload.get("sub") or payload.get("email")
+        logger.debug(f"Extracted email: {email}")
+        
         if email is None:
+            logger.debug("No email found in token")
             raise credentials_exception
+            
         token_data = TokenData(email=email)
-    except JWTError:
+    except JWTError as e:
+        logger.debug(f"JWT Error: {e}")
         raise credentials_exception
     
     user = get_user_by_email(db, email=token_data.email)
+    logger.debug(f"User lookup result: {user.email if user else 'None'}")
+    
     if user is None:
+        logger.debug("User not found in database")
         raise credentials_exception
+    
+    logger.debug("Authentication successful")
     return user
