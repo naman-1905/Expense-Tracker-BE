@@ -81,15 +81,35 @@ def create_app():
             limit = int(request.args.get('limit', 10))
             
             query = """
-                SELECT * FROM transactions 
+                SELECT transaction_id, name, amount, date, type, emoji
+                FROM transactions 
                 WHERE user_id = %s 
-                AND created_at >= %s 
-                ORDER BY created_at DESC 
+                AND date >= %s 
+                ORDER BY date DESC 
                 LIMIT %s
             """
             date_limit = datetime.now() - timedelta(days=days)
             result = execute_query(query, (user_id, date_limit, limit), fetch=True)
-            return jsonify(result)
+            
+            # Format the results to ensure proper JSON serialization
+            transactions = []
+            for row in result:
+                transactions.append({
+                    'transaction_id': row['transaction_id'],
+                    'name': row['name'],
+                    'amount': int(row['amount']),  # Convert to int as per your schema
+                    'date': row['date'].isoformat() if row['date'] else None,
+                    'type': row['type'],
+                    'emoji': row['emoji']
+                })
+            
+            return jsonify({
+                'transactions': transactions,
+                'count': len(transactions),
+                'user_id': int(user_id),
+                'days': days,
+                'limit': limit
+            })
         except Exception as e:
             return jsonify({"error": "Internal server error", "message": str(e)}), 500
 
