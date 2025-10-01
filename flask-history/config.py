@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 
 # Load environment variables from parent directory
-load_dotenv(dotenv_path='../.env')
+load_dotenv(dotenv_path='./.env')
 
 class Config:
     # Database configuration
