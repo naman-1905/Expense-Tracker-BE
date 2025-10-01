@@ -20,9 +20,9 @@ pipeline {
     }
 
     environment {
-        EXPRESS_AUTH_IMAGE = "halfskirmish-expenses:3000"
-        FASTAPI_CRUD_IMAGE = "crud_expenses:8000"       // fixed typo
-        FLASK_HISTORY_IMAGE = "history_expenses:8000"   // fixed invalid port
+        EXPRESS_AUTH_IMAGE = "auth_expenses"
+        FASTAPI_CRUD_IMAGE = "crud_expenses"       // fixed typo
+        FLASK_HISTORY_IMAGE = "history_expenses"   // fixed invalid port
         EXPRESS_AUTH_PATH = "express-auth"
         FASTAPI_CRUD_PATH = "fastapi-crud"
         FLASK_HISTORY_PATH = "flask-history"
