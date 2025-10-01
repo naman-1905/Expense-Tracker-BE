@@ -84,7 +84,7 @@ pipeline {
                             docker -H tcp://$host:2375 pull $REGISTRY/$IMAGE_NAME
                             docker -H tcp://$host:2375 stop $IMAGE_NAME || true
                             docker -H tcp://$host:2375 rm $IMAGE_NAME || true
-                            docker -H tcp://$host:2375 run -d --name $IMAGE_NAME --network network-app $REGISTRY/$IMAGE_NAME
+                            docker -H tcp://$host:2375 run -d --name $IMAGE_NAME --network app $REGISTRY/$IMAGE_NAME
                         """
                     }
                 }
