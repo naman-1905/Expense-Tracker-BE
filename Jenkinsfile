@@ -21,8 +21,8 @@ pipeline {
 
     environment {
         EXPRESS_AUTH_IMAGE = "halfskirmish-expenses:3000"
-        FASTAPI_CRUD_IMAGE = "crud_expesnses:8000"
-        FLASK_HISTORY_IMAGE = "history_expenses:80000"
+        FASTAPI_CRUD_IMAGE = "crud_expenses:8000"       // fixed typo
+        FLASK_HISTORY_IMAGE = "history_expenses:8000"   // fixed invalid port
         EXPRESS_AUTH_PATH = "express-auth"
         FASTAPI_CRUD_PATH = "fastapi-crud"
         FLASK_HISTORY_PATH = "flask-history"
@@ -54,6 +54,7 @@ pipeline {
                         env.IMAGE_NAME = env.FLASK_HISTORY_IMAGE
                         env.APP_PATH = env.FLASK_HISTORY_PATH
                     }
+
                     sh """
                         docker build -t \$IMAGE_NAME \$APP_PATH
                         docker tag \$IMAGE_NAME \$REGISTRY/\$IMAGE_NAME
@@ -77,13 +78,13 @@ pipeline {
                     } else {
                         deployHosts = [params.DEPLOY_HOST]
                     }
+
                     for (host in deployHosts) {
                         sh """
-                            ssh root@${host} \\
-                            'docker pull \$REGISTRY/\$IMAGE_NAME && \\
-                            docker stop \$IMAGE_NAME || true && \\
-                            docker rm \$IMAGE_NAME || true && \\
-                            docker run -d --name \$IMAGE_NAME --network network-app -p 8000:8000 \$REGISTRY/\$IMAGE_NAME'
+                            docker -H tcp://$host:2375 pull $REGISTRY/$IMAGE_NAME
+                            docker -H tcp://$host:2375 stop $IMAGE_NAME || true
+                            docker -H tcp://$host:2375 rm $IMAGE_NAME || true
+                            docker -H tcp://$host:2375 run -d --name $IMAGE_NAME --network network-app $REGISTRY/$IMAGE_NAME
                         """
                     }
                 }
