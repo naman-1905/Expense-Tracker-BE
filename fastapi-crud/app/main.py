@@ -16,15 +16,23 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS middleware
+origins = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "https://expenses.halfskirmish.com",
+    "https://crudexpenses.halfskirmish.com",
+]
+
+# CORS middleware - MUST be added before routes
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure this for production
+    allow_origins=origins,  # Specific origins for production
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["*"],
+    max_age=3600,  # Cache preflight requests for 1 hour
 )
-
 # Include routers
 app.include_router(users.router, prefix="/api/users", tags=["Users"])
 app.include_router(transactions.router, prefix="/api/transactions", tags=["Transactions"])
