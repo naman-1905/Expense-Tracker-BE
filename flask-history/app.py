@@ -6,7 +6,20 @@ from datetime import datetime, timedelta
 def create_app():
     app = Flask(__name__)
     config = Config()
-    CORS(app)
+    CORS(app, 
+         resources={
+             r"/api/*": {
+                 "origins": [
+                     "http://localhost:3000",
+                     "https://expenses.halfskirmish.com"
+                 ],
+                 "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+                 "allow_headers": ["Content-Type", "Authorization"],
+                 "expose_headers": ["Content-Type"],
+                 "supports_credentials": True,
+                 "max_age": 3600
+             }
+         })
 
     @app.route('/')
     def root():
