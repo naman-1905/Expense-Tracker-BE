@@ -35,7 +35,7 @@ pipeline {
                     if (params.REGISTRY_OPTION == 'Kshitiz Container (10.243.4.236:5000)') {
                         env.REGISTRY = "10.243.4.236:5000"
                     } else {
-                        env.REGISTRY = "10.243.250.123:5000"
+                        env.REGISTRY = "10.243.250.132:5000"
                     }
                 }
             }
