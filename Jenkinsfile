@@ -9,7 +9,7 @@ pipeline {
         )
         choice(
             name: 'REGISTRY_OPTION',
-            choices: ['Kshitiz Container (10.243.4.236:5000)', 'Naman Container (10.243.250.123:5000)'],
+            choices: ['Kshitiz Container (10.243.4.236:5000)', 'Naman Container (10.243.250.132:5000)'],
             description: 'Select which registry to push the image to'
         )
         choice(
