@@ -9,7 +9,7 @@ pipeline {
         )
         choice(
             name: 'REGISTRY_OPTION',
-            choices: ['Kshitiz Container (100.94.112.9:5000)', 'Naman Container (registry.halfskirmish.com)'],
+            choices: ['Kshitiz Container (100.94.112.9:5000)', 'Naman Container (100.121.35.107:5000)'],
             description: 'Select which registry to push the image to'
         )
         choice(
@@ -35,7 +35,7 @@ pipeline {
                     if (params.REGISTRY_OPTION == 'Kshitiz Container (100.94.112.9:5000)') {
                         env.REGISTRY = "100.94.112.9:5000"
                     } else {
-                        env.REGISTRY = "registry.halfskirmish.com"
+                        env.REGISTRY = "100.121.35.107:5000"
                     }
                 }
             }
