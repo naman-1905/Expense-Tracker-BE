@@ -85,12 +85,6 @@ pipeline {
                         docker tag ${BUILD_REGISTRY}/${env.IMAGE_NAME}:${IMAGE_TAG} ${DEPLOY_REGISTRY}/${env.IMAGE_NAME}:${IMAGE_TAG}
                         docker push ${DEPLOY_REGISTRY}/${env.IMAGE_NAME}:${IMAGE_TAG}
                     """
-
-                    echo "Logout from registries"
-                    sh """
-                        docker logout ${BUILD_REGISTRY} || true
-                        docker logout ${DEPLOY_REGISTRY} || true
-                    """
                 }
             }
         }
@@ -160,8 +154,10 @@ pipeline {
     post {
         cleanup {
             script {
-                echo "Cleaning up local Docker images..."
+                echo "Logging out and cleaning up local Docker images..."
                 sh """
+                    docker logout ${BUILD_REGISTRY} || true
+                    docker logout ${DEPLOY_REGISTRY} || true
                     docker rmi ${BUILD_REGISTRY}/${env.IMAGE_NAME}:${IMAGE_TAG} || true
                     docker rmi ${DEPLOY_REGISTRY}/${env.IMAGE_NAME}:${IMAGE_TAG} || true
                     docker system prune -f || true
