@@ -104,15 +104,15 @@ pipeline {
                             echo "Deploying ${env.IMAGE_NAME} to Kahitoz Docker host..."
                             withCredentials([usernamePassword(credentialsId: 'docker_creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                                 sh '''
-                                    echo "$DOCKER_PASS" | DOCKER_HOST=''' + KAHITOZ_DOCKER_HOST + ''' docker login ''' + DEPLOY_REGISTRY + ''' -u "$DOCKER_USER" --password-stdin
-                                    DOCKER_HOST=''' + KAHITOZ_DOCKER_HOST + ''' docker stop ''' + env.IMAGE_NAME + ''' || true
-                                    DOCKER_HOST=''' + KAHITOZ_DOCKER_HOST + ''' docker rm ''' + env.IMAGE_NAME + ''' || true
-                                    DOCKER_HOST=''' + KAHITOZ_DOCKER_HOST + ''' docker pull ''' + DEPLOY_REGISTRY + '''/''' + env.IMAGE_NAME + ''':''' + IMAGE_TAG + '''
+                                    echo "$DOCKER_PASS" | DOCKER_HOST=''' + KAHITOZ_DOCKER_HOST + ''' docker login ''' + DEPLOY_REGISTRY + ''' -u "$DOCKER_USER" --password-stdin && \
+                                    DOCKER_HOST=''' + KAHITOZ_DOCKER_HOST + ''' docker stop ''' + env.IMAGE_NAME + ''' || true && \
+                                    DOCKER_HOST=''' + KAHITOZ_DOCKER_HOST + ''' docker rm ''' + env.IMAGE_NAME + ''' || true && \
+                                    DOCKER_HOST=''' + KAHITOZ_DOCKER_HOST + ''' docker pull ''' + DEPLOY_REGISTRY + '''/''' + env.IMAGE_NAME + ''':''' + IMAGE_TAG + ''' && \
                                     DOCKER_HOST=''' + KAHITOZ_DOCKER_HOST + ''' docker run -d \
                                         --name ''' + env.IMAGE_NAME + ''' \
                                         --network ''' + NETWORK_NAME + ''' \
                                         --restart always \
-                                        ''' + DEPLOY_REGISTRY + '''/''' + env.IMAGE_NAME + ''':''' + IMAGE_TAG + '''
+                                        ''' + DEPLOY_REGISTRY + '''/''' + env.IMAGE_NAME + ''':''' + IMAGE_TAG + ''' && \
                                     DOCKER_HOST=''' + KAHITOZ_DOCKER_HOST + ''' docker logout ''' + DEPLOY_REGISTRY + ''' || true
                                 '''
                             }
@@ -132,15 +132,15 @@ pipeline {
                             echo "Deploying ${env.IMAGE_NAME} to Naman Docker host..."
                             withCredentials([usernamePassword(credentialsId: 'docker_creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                                 sh '''
-                                    echo "$DOCKER_PASS" | DOCKER_HOST=''' + NAMAN_DOCKER_HOST + ''' docker login ''' + DEPLOY_REGISTRY + ''' -u "$DOCKER_USER" --password-stdin
-                                    DOCKER_HOST=''' + NAMAN_DOCKER_HOST + ''' docker stop ''' + env.IMAGE_NAME + ''' || true
-                                    DOCKER_HOST=''' + NAMAN_DOCKER_HOST + ''' docker rm ''' + env.IMAGE_NAME + ''' || true
-                                    DOCKER_HOST=''' + NAMAN_DOCKER_HOST + ''' docker pull ''' + DEPLOY_REGISTRY + '''/''' + env.IMAGE_NAME + ''':''' + IMAGE_TAG + '''
+                                    echo "$DOCKER_PASS" | DOCKER_HOST=''' + NAMAN_DOCKER_HOST + ''' docker login ''' + DEPLOY_REGISTRY + ''' -u "$DOCKER_USER" --password-stdin && \
+                                    DOCKER_HOST=''' + NAMAN_DOCKER_HOST + ''' docker stop ''' + env.IMAGE_NAME + ''' || true && \
+                                    DOCKER_HOST=''' + NAMAN_DOCKER_HOST + ''' docker rm ''' + env.IMAGE_NAME + ''' || true && \
+                                    DOCKER_HOST=''' + NAMAN_DOCKER_HOST + ''' docker pull ''' + DEPLOY_REGISTRY + '''/''' + env.IMAGE_NAME + ''':''' + IMAGE_TAG + ''' && \
                                     DOCKER_HOST=''' + NAMAN_DOCKER_HOST + ''' docker run -d \
                                         --name ''' + env.IMAGE_NAME + ''' \
                                         --network ''' + NETWORK_NAME + ''' \
                                         --restart always \
-                                        ''' + DEPLOY_REGISTRY + '''/''' + env.IMAGE_NAME + ''':''' + IMAGE_TAG + '''
+                                        ''' + DEPLOY_REGISTRY + '''/''' + env.IMAGE_NAME + ''':''' + IMAGE_TAG + ''' && \
                                     DOCKER_HOST=''' + NAMAN_DOCKER_HOST + ''' docker logout ''' + DEPLOY_REGISTRY + ''' || true
                                 '''
                             }
