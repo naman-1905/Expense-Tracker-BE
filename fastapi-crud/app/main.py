@@ -16,7 +16,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CRITICAL: Define origins as a list of strings
+# CRITICAL: Define origins - be explicit and specific
 origins = [
     "http://localhost:3000",
     "http://localhost:5173",
@@ -29,13 +29,13 @@ origins = [
     "https://financehistory.halfskirmish.com",
 ]
 
-# CORS middleware - MUST be added BEFORE routes
+# CORS middleware - CRITICAL: Must be first middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # List of allowed origins
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],  # Allow all methods including OPTIONS
-    allow_headers=["*"],  # Allow all headers
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allow_headers=["*"],
     expose_headers=["*"],
     max_age=3600,
 )
@@ -59,8 +59,6 @@ async def health_check():
         "service": "fastapi-crud"
     }
 
-# Remove the generic OPTIONS handler - let CORS middleware handle it
-
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT_FASTAPI", 5000))
@@ -71,5 +69,5 @@ if __name__ == "__main__":
         host="0.0.0.0", 
         port=port, 
         reload=True,
-        log_level="info"
+        log_level="debug"  # Changed to debug for more info
     )
