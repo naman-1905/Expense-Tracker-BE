@@ -16,6 +16,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# CRITICAL: Define origins as a list of strings
 origins = [
     "http://localhost:3000",
     "http://localhost:5173",
@@ -23,31 +24,55 @@ origins = [
     "https://crudexpenses.halfskirmish.com",
     "https://authexpenses.halfskirmish.com",
     "https://historyexpenses.halfskirmish.com",
+    "https://financeauth.halfskirmish.com",
+    "https://financecrud.halfskirmish.com",
+    "https://financehistory.halfskirmish.com",
 ]
 
-# CORS middleware - MUST be added before routes
+# CORS middleware - MUST be added BEFORE routes
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # Specific origins for production
+    allow_origins=origins,  # List of allowed origins
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allow_headers=["*"],
+    allow_headers=["*"],  # Allow all headers
     expose_headers=["*"],
-    max_age=3600,  # Cache preflight requests for 1 hour
+    max_age=3600,
 )
-# Include routers
+
+# Include routers AFTER middleware
 app.include_router(users.router, prefix="/api/users", tags=["Users"])
 app.include_router(transactions.router, prefix="/api/transactions", tags=["Transactions"])
 
 @app.get("/")
 async def root():
-    return {"message": "Expense Tracker API is running!"}
+    return {
+        "message": "Expense Tracker API is running!",
+        "service": "fastapi-crud",
+        "version": "1.0.0"
+    }
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy"}
+    return {
+        "status": "healthy",
+        "service": "fastapi-crud"
+    }
+
+# Add CORS debug endpoint (remove in production)
+@app.options("/{full_path:path}")
+async def options_handler(full_path: str):
+    return {"message": "OK"}
 
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT_FASTAPI", 5000))
-    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)
+    print(f"Starting FastAPI CRUD service on port {port}")
+    print(f"Allowed origins: {origins}")
+    uvicorn.run(
+        "main:app", 
+        host="0.0.0.0", 
+        port=port, 
+        reload=True,
+        log_level="info"
+    )

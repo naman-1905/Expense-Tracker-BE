@@ -6,6 +6,8 @@ from datetime import datetime, timedelta
 def create_app():
     app = Flask(__name__)
     config = Config()
+    
+    # Configure CORS with explicit settings
     CORS(app, 
          resources={
              r"/api/*": {
@@ -27,9 +29,14 @@ def create_app():
              }
          })
 
+    # Add OPTIONS handler for preflight
+    @app.route('/api/<path:path>', methods=['OPTIONS'])
+    def handle_options(path):
+        return '', 204
+
     @app.route('/')
     def root():
-        return {
+        return jsonify({
             'message': 'Flask History Service is running',
             'service': 'flask-history',
             'version': '1.0.0',
@@ -38,9 +45,9 @@ def create_app():
                 'balance': '/api/history/balance?user_id={user_id}',
                 'income': '/api/history/income?user_id={user_id}',
                 'expenses': '/api/history/expenses?user_id={user_id}',
-                'transactions': '/api/history/transactions?user_id={user_id}&start_date={start_date}&end_date={end_date}'
+                'transactions': '/api/history/transactions?user_id={user_id}&days={days}&limit={limit}'
             }
-        }
+        })
 
     @app.route('/api/history/health', methods=['GET'])
     def health_check():
@@ -54,6 +61,9 @@ def create_app():
     def get_balance():
         try:
             user_id = request.args.get('user_id')
+            if not user_id:
+                return jsonify({"error": "user_id is required"}), 400
+                
             query = """
                 SELECT COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE -amount END), 0) as balance 
                 FROM transactions 
@@ -62,12 +72,16 @@ def create_app():
             result = execute_query(query, (user_id,), fetch=True)
             return jsonify(result[0] if result else {'balance': 0})
         except Exception as e:
+            print(f"Error in get_balance: {str(e)}")
             return jsonify({"error": "Internal server error", "message": str(e)}), 500
 
     @app.route('/api/history/income', methods=['GET'])
     def get_income():
         try:
             user_id = request.args.get('user_id')
+            if not user_id:
+                return jsonify({"error": "user_id is required"}), 400
+                
             query = """
                 SELECT COALESCE(SUM(amount), 0) as total_income 
                 FROM transactions 
@@ -76,12 +90,16 @@ def create_app():
             result = execute_query(query, (user_id,), fetch=True)
             return jsonify(result[0] if result else {'total_income': 0})
         except Exception as e:
+            print(f"Error in get_income: {str(e)}")
             return jsonify({"error": "Internal server error", "message": str(e)}), 500
 
     @app.route('/api/history/expenses', methods=['GET'])
     def get_expenses():
         try:
             user_id = request.args.get('user_id')
+            if not user_id:
+                return jsonify({"error": "user_id is required"}), 400
+                
             query = """
                 SELECT COALESCE(SUM(amount), 0) as total_expenses 
                 FROM transactions 
@@ -90,12 +108,16 @@ def create_app():
             result = execute_query(query, (user_id,), fetch=True)
             return jsonify(result[0] if result else {'total_expenses': 0})
         except Exception as e:
+            print(f"Error in get_expenses: {str(e)}")
             return jsonify({"error": "Internal server error", "message": str(e)}), 500
 
     @app.route('/api/history/transactions', methods=['GET'])
     def get_transactions():
         try:
             user_id = request.args.get('user_id')
+            if not user_id:
+                return jsonify({"error": "user_id is required"}), 400
+                
             days = int(request.args.get('days', 30))
             limit = int(request.args.get('limit', 10))
             
@@ -110,13 +132,13 @@ def create_app():
             date_limit = datetime.now() - timedelta(days=days)
             result = execute_query(query, (user_id, date_limit, limit), fetch=True)
             
-            # Format the results to ensure proper JSON serialization
+            # Format the results
             transactions = []
             for row in result:
                 transactions.append({
                     'transaction_id': row['transaction_id'],
                     'name': row['name'],
-                    'amount': int(row['amount']),  # Convert to int as per your schema
+                    'amount': int(row['amount']),
                     'date': row['date'].isoformat() if row['date'] else None,
                     'type': row['type'],
                     'emoji': row['emoji']
@@ -130,6 +152,7 @@ def create_app():
                 'limit': limit
             })
         except Exception as e:
+            print(f"Error in get_transactions: {str(e)}")
             return jsonify({"error": "Internal server error", "message": str(e)}), 500
 
     return app
