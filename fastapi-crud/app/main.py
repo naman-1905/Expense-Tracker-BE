@@ -34,7 +34,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,  # List of allowed origins
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allow_methods=["*"],  # Allow all methods including OPTIONS
     allow_headers=["*"],  # Allow all headers
     expose_headers=["*"],
     max_age=3600,
@@ -59,10 +59,7 @@ async def health_check():
         "service": "fastapi-crud"
     }
 
-# Add CORS debug endpoint (remove in production)
-@app.options("/{full_path:path}")
-async def options_handler(full_path: str):
-    return {"message": "OK"}
+# Remove the generic OPTIONS handler - let CORS middleware handle it
 
 if __name__ == "__main__":
     import uvicorn
