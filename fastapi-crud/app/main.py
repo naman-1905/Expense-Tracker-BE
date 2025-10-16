@@ -21,6 +21,8 @@ origins = [
     "http://localhost:5173",
     "https://expenses.halfskirmish.com",
     "https://crudexpenses.halfskirmish.com",
+    "https://authexpenses.halfskirmish.com",
+    "https://historyexpenses.halfskirmish.com",
 ]
 
 # CORS middleware - MUST be added before routes

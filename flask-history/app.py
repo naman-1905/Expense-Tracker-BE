@@ -11,7 +11,13 @@ def create_app():
              r"/api/*": {
                  "origins": [
                      "http://localhost:3000",
-                     "https://expenses.halfskirmish.com"
+                     "https://expenses.halfskirmish.com",
+                     "https://crudexpenses.halfskirmish.com",
+                     "https://authexpenses.halfskirmish.com",
+                     "https://historyexpenses.halfskirmish.com",
+                     "https://financeauth.halfskirmish.com",
+                     "https://financecrud.halfskirmish.com",
+                     "https://financehistory.halfskirmish.com",
                  ],
                  "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
                  "allow_headers": ["Content-Type", "Authorization"],
