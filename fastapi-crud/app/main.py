@@ -7,9 +7,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Create tables
-Base.metadata.create_all(bind=engine)
-
 app = FastAPI(
     title="Expense Tracker API",
     description="A FastAPI backend for expense tracking",
