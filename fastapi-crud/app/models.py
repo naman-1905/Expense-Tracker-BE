@@ -9,7 +9,6 @@ from datetime import datetime
 # SQLAlchemy Models
 class User(Base):
     __tablename__ = "users"
-    __table_args__ = {'schema': 'expense'}
     
     user_id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False)
