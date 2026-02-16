@@ -1,1 +1,6 @@
 db
+fastapi-crud/.env
+flask-history/.env
+express-auth/.env
+
+**/.env
