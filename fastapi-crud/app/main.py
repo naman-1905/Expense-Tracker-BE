@@ -62,7 +62,7 @@ if __name__ == "__main__":
     print(f"Starting FastAPI CRUD service on port {port}")
     print(f"Allowed origins: {origins}")
     uvicorn.run(
-        "main:app", 
+        "app.main:app",
         host="0.0.0.0", 
         port=port, 
         reload=True,
