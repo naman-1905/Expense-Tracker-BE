@@ -1,198 +1,44 @@
-# Expense Tracker Backend (Polyglot Microservices)
+# Expense Tracker API
 
-This project consists of **three independent backend services**:
+The backend is a single FastAPI service for authentication, transactions, and history summaries. The Next.js app is local first and works without this service; this API is available when a user wants an account or server backed data.
 
-* FastAPI → CRUD Service
-* Express.js → Auth Service
-* Flask → History Service
+## Run locally
 
-Each service connects to the same SQL database but runs independently with its **own environment configuration**.
+Use Python 3.10 or newer and PostgreSQL. Create the database, then run `db/init.sql`. Configure `fastapi-crud/.env`:
 
----
-
-## 📁 Project Structure
-
-```
-db/
- └── init.sql
-
-express-auth/
-fastapi-crud/
-flask-history/
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=expense_db
+DB_USER=expense_user
+DB_PASSWORD=change-me
+JWT_SECRET=replace-with-a-long-random-secret
+PORT=8000
+CORS_ORIGINS=http://localhost:3000,capacitor://localhost,http://localhost
 ```
 
-The `db/init.sql` file contains the schema required to initialize the database.
-
----
-
-## ⚙️ Environment Setup
-
-Each service requires its **own `.env` file**.
-
-Create a `.env` file inside:
-
-* `express-auth/`
-* `fastapi-crud/`
-* `flask-history/`
-
----
-
-## 🔑 Required Environment Variables
-
-Add the following inside **each service's `.env` file**:
-
-```
-DB_HOST=host
-DB_PORT=port
-DB_NAME=database_name
-DB_USER=username
-DB_PASSWORD=password
-JWT_SECRET=your_secret
-```
-
-Service-specific ports:
-
-### FastAPI (.env inside fastapi-crud)
-
-```
-PORT_FASTAPI=8000
-```
-
-### Express (.env inside express-auth)
-
-```
-PORT_EXPRESS=8001
-```
-
-### Flask (.env inside flask-history)
-
-```
-PORT_FLASK=8002
-```
-
----
-
-## 🗄️ Database Setup
-
-1. Create a SQL database.
-2. Run the schema:
-
-```
-db/init.sql
-```
-
-This will initialize all required tables.
-
----
-
-## 🚀 Running the Services
-
-### 1. FastAPI - CRUD Service
-
-Navigate to:
-
-```
+```sh
 cd fastapi-crud
-```
-
-Install dependencies:
-
-```
+python -m venv .venv
+# Activate the virtual environment, then:
 pip install -r requirements.txt
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-Run:
+The API docs are served at `/docs`; `/health` is a liveness endpoint. Docker builds use the same FastAPI app and expect database and JWT settings as runtime environment variables. Do not put secrets in the image.
 
-```
-python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
+## Routes
 
----
+| Purpose | Route |
+| --- | --- |
+| Sign up / login / profile / refresh | `/api/auth/*` |
+| Account aliases | `/api/users/*` |
+| Create, list, read, update, delete transactions | `/api/transactions/*` |
+| Monthly summary | `/api/transactions/summary/monthly` |
+| Balance, income, expense, recent history | `/api/history/*` |
 
-### 2. Express - Auth Service
+All account and transaction routes except signup/login/refresh require a Bearer access token. History derives the user from the token; clients must not supply another user's ID. Existing public `users` and `transactions` tables are used, including the `savings` transaction type.
 
-Navigate to:
+## Deployment
 
-```
-cd express-auth
-```
-
-Install dependencies:
-
-```
-npm install
-```
-
-Run:
-
-```
-npm run dev
-```
-
----
-
-### 3. Flask - History Service
-
-Navigate to:
-
-```
-cd flask-history
-```
-
-Install dependencies:
-
-```
-pip install -r requirements.txt
-```
-
-Run:
-
-```
-python app.py
-```
-
----
-
-## 🐳 Docker Support
-
-Each service contains its own `Dockerfile`.
-
-You can containerize and deploy them independently if required.
-
----
-
-## 🧠 Architecture Overview
-
-| Service | Framework  | Responsibility       |
-| ------- | ---------- | -------------------- |
-| Auth    | Express.js | Authentication & JWT |
-| CRUD    | FastAPI    | Expense Operations   |
-| History | Flask      | Expense History      |
-
-All services:
-
-* Share the same database schema
-* Maintain independent configs
-* Can scale individually
-
----
-
-## 📝 Notes
-
-* Ensure `.env` is present before running any service.
-* Ports must be unique.
-* JWT_SECRET must match across services.
-
----
-
-## 📌 Default Ports
-
-| Service | Port |
-| ------- | ---- |
-| FastAPI | 8000 |
-| Express | 8001 |
-| Flask   | 8002 |
-
----
-
-You're now ready to run the Expense Tracker Backend 
+Build from `fastapi-crud/`. The service listens on `PORT` (default 8000). Provide `DATABASE_URL` or the individual `DB_*` values, plus `JWT_SECRET`, through the deployment environment.
