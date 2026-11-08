@@ -25,7 +25,7 @@ passwords = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer = HTTPBearer(auto_error=False)
 
 app = FastAPI(title="Expense Tracker API", description="Single FastAPI service for auth, transactions, and history", version="2.0.0")
-origins = [origin.strip() for origin in os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:3001,capacitor://localhost,http://localhost").split(",") if origin.strip()]
+origins = [origin.strip() for origin in os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:3001,capacitor://localhost,https://localhost,http://localhost").split(",") if origin.strip()]
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
 
