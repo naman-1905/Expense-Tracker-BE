@@ -4,7 +4,7 @@ The backend is a single FastAPI service for authentication, transactions, and hi
 
 ## Run locally
 
-Use Python 3.10 or newer and PostgreSQL. Create the database, then run `db/init.sql`. Configure `fastapi-crud/.env`:
+Use Python 3.10 or newer and PostgreSQL. Create the database, then run `db/init.sql`. Configure `fastapi/.env`:
 
 ```env
 DB_HOST=localhost
@@ -18,7 +18,7 @@ CORS_ORIGINS=http://localhost:3000,capacitor://localhost,http://localhost
 ```
 
 ```sh
-cd fastapi-crud
+cd fastapi
 python -m venv .venv
 # Activate the virtual environment, then:
 pip install -r requirements.txt
@@ -41,4 +41,4 @@ All account and transaction routes except signup/login/refresh require a Bearer 
 
 ## Deployment
 
-Build from `fastapi-crud/`. The service listens on `PORT` (default 8000). Provide `DATABASE_URL` or the individual `DB_*` values, plus `JWT_SECRET`, through the deployment environment.
+Build from `fastapi/`. The service listens on `PORT` (default 8000). Provide `DATABASE_URL` or the individual `DB_*` values, plus `JWT_SECRET`, through the deployment environment.
