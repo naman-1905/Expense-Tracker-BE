@@ -5,7 +5,7 @@ pipeline {
         IMAGE_TAG = 'latest'
         BUILD_REGISTRY = 'registrypush.kahitoz.com:5000'
         IMAGE_NAME = 'expense_tracker_api'
-        APP_PATH = 'fastapi-crud'
+        APP_PATH = 'fastapi'
     }
 
     stages {
