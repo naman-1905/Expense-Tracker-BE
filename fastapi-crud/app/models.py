@@ -21,7 +21,7 @@ class User(Base):
 class Transaction(Base):
     __tablename__ = "transactions"
     __table_args__ = (
-        CheckConstraint("type IN ('income', 'expense')", name='check_transaction_type'),
+        CheckConstraint("type IN ('income', 'expense', 'savings')", name='check_transaction_type'),
     )
     
     transaction_id = Column(Integer, primary_key=True, index=True)
